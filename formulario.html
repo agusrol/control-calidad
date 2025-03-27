@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ingreso de Control de Calidad</title>
+</head>
+<body>
+  <h2>Nuevo Registro de Control de Calidad</h2>
+  <form action="insertar.php" method="POST">
+    <!-- Datos generales -->
+	<h3>Datos del producto</h3>
+    <label>Nº Análisis: <input type="text" name="n_analisis" required></label><br>
+    <label>Nº Orden: <input type="text" name="n_orden" required></label><br>
+    <label>Producto: <input type="text" name="producto" required></label><br>
+    <label>Lote: <input type="text" name="lote" required></label><br>
+    <label>Formato: <input type="text" name="formato"></label><br>
+	
+	<h3>Pesado de materias primas</h3>
+    <label>Control de balanza: <input type="text" name="control_balanza"></label><br>
+    <label>Fecha: <input type="date" name="fecha"></label><br>
+    <label>Controló: <input type="text" name="controlo"></label><br>
+
+    <hr>
+
+    <!-- Análisis físicos -->
+	<h3>Mezcla húmeda y secado</h3>
+    <label>% Humedad (G. Húmeda): <input type="number" step="any" name="humedad_g_humeda"></label><br>
+    <label>% Humedad (Estufa): <input type="number" step="any" name="humedad_estufa"></label><br>
+
+	<h3>Granulación y mezcla seca</h3>
+    <label>Humedad %: <input type="number" step="any" name="humedad_porcentaje"></label><br>
+    <label>Grueso: <input type="text" name="grueso"></label><br>
+    <label>Entrefino: <input type="text" name="entrefino"></label><br>
+    <label>Fino: <input type="text" name="fino"></label><br>
+    <label>Densidad Aparente: <input type="number" step="any" name="densidad_aparente"></label><br>
+    <label>Densidad Compactada: <input type="number" step="any" name="densidad_compactada"></label><br>
+    <label>Índice de Hausner: <input type="number" step="any" name="indice_hausner"></label><br>
+    <label>Índice de Carr: <input type="number" step="any" name="indice_carr"></label><br>
+
+	<h3>Compresión</h3>
+    <label>Peso: <input type="number" step="any" name="peso"></label><br>
+    <label>Dureza: <input type="number" step="any" name="dureza"></label><br>
+    <label>Friabilidad: <input type="number" step="any" name="friabilidad"></label><br>
+    <label>Disgregación: <input type="text" name="disgregacion"></label><br>
+    <label>Altura: <input type="number" step="any" name="altura"></label><br>
+    <label>% Humedad: <input type="number" step="any" name="humedad"></label><br>
+
+    <hr>
+    <h3>Recubrimiento</h3>
+    <label>Peso: <input type="number" step="any" name="peso1"></label><br>
+    <label>Disgregación: <input type="text" name="disgregacion1"></label><br>
+    <label>Altura: <input type="number" step="any" name="altura1"></label><br>
+    <label>Humedad (Recubrimiento): <input type="number" step="any" name="humedad1"></label><br>
+
+    <hr>
+
+    <!-- Microbiología / Otros -->
+	<h3>Control higiénico</h3>
+    <label>A. Totales: <input type="text" name="a_totales"></label><br>
+    <label>Enterobacterias: <input type="text" name="enterobact"></label><br>
+    <label>E. Coli: <input type="text" name="e_coli"></label><br>
+    <label>S. Aureus: <input type="text" name="s_aureus"></label><br>
+    <label>H. y Levaduras (HyL): <input type="text" name="hyl"></label><br>
+
+	<h3>Gummies</h3>
+    <label>Grados Brix: <input type="number" step="any" name="grados_brix"></label><br>
+    <label>Peso Promedio (10 caramelos): <input type="number" step="any" name="peso_promedio"></label><br>
+    <label>Azúcar Libre (gr): <input type="number" step="any" name="azucar_libre"></label><br>
+
+    <button type="submit">Guardar</button>
+  </form>
+</body>
+</html>

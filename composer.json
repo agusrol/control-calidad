@@ -1,0 +1,17 @@
+{
+    "name": "usuario/control-calidad",
+    "autoload": {
+        "psr-4": {
+            "Usuario\\ControlCalidad\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Agustín",
+            "email": "agusrol97@gmail.com"
+        }
+    ],
+    "require": {
+        "phpoffice/phpspreadsheet": "^4.1"
+    }
+}
