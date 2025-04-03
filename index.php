@@ -1,159 +1,144 @@
 <?php
-// Conexión a PostgreSQL
-$host = "localhost";
-$db = "control_calidad";
-$user = "postgres";
-$pass = "admin";
-
-try {
-    $pdo = new PDO("pgsql:host=$host;dbname=$db", $user, $pass);
-    $query = $pdo->query("SELECT 
-        id, 
-        \"n_análisis\", 
-        n_orden, 
-        producto, 
-        lote, 
-        formato, 
-        control_de_balanza, 
-        fecha, 
-        \"controló\",
-        pct_humedad_g_humeda, 
-        pct_humedad_estufa, 
-        humedad_pct, 
-        grueso, 
-        entrefino, 
-        fino,
-        densidad_aparente, 
-        densidad_compactada, 
-        indice_de_hausner, 
-        indice_de_carr,
-        peso, 
-        dureza, 
-        friabilidad, 
-        \"disgregación\", 
-        altura, 
-        humedad,
-        peso1, 
-        \"disgregación1\", 
-        altura1, 
-        a_totales, 
-        enterobact, 
-        e_coli, 
-        s_aureus, 
-        hyl,
-        grados__brix, 
-        peso_promedio_10_caramelos, 
-        azucar_libre___gr_ AS azucar_libre
-    FROM control_calidad ORDER BY id DESC");
-
-    $registros = $query->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Error: " . $e->getMessage());
-}
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 ?>
 
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Listado de registros</title>
-  <style>
-    table { border-collapse: collapse; width: 100%; font-size: 12px; }
-    th, td { padding: 6px; border: 1px solid #aaa; text-align: center; }
-    th { background-color: #eee; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Control de Calidad - Listado</title>
 </head>
 <body>
-  <h2>Registros de Control de Calidad</h2>
-  <a href="formulario.html">➕ Nuevo Registro</a>
-  <table>
+
+<?php
+$host = "localhost";
+$port = "5432";
+$dbname = "control_calidad";
+$user = "postgres";
+$password = "admin";
+
+$dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
+try {
+    $pdo = new PDO($dsn, $user, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    die("Error de conexión: " . $e->getMessage());
+}
+
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
+$limit  = isset($_GET['limit'])  ? (int) $_GET['limit'] : 10;
+$page   = isset($_GET['page'])   ? (int) $_GET['page']  : 1;
+if ($page < 1) $page = 1;
+
+$validLimits = [10, 25, 50, 100];
+if (!in_array($limit, $validLimits)) {
+    $limit = 10;
+}
+
+$offset = ($page - 1) * $limit;
+$sql     = "SELECT * FROM control_calidad";
+$sqlCount= "SELECT COUNT(*) FROM control_calidad";
+
+if ($search !== '') {
+    $sql .= ' WHERE "n_análisis" ILIKE :search';
+    $sqlCount.= ' WHERE "n_análisis" ILIKE :search';
+}
+
+$sql .= " ORDER BY id ASC";
+$sql .= " LIMIT :limit OFFSET :offset";
+
+$stmt = $pdo->prepare($sql);
+if ($search !== '') {
+    $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
+}
+$stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+$stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+$stmt->execute();
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$stmtCount = $pdo->prepare($sqlCount);
+if ($search !== '') {
+    $stmtCount->bindValue(':search', "%$search%", PDO::PARAM_STR);
+}
+$stmtCount->execute();
+$totalRecords = $stmtCount->fetchColumn();
+$totalPages   = ceil($totalRecords / $limit);
+
+$columns = [];
+if (!empty($results)) {
+    $columns = array_keys($results[0]);
+} else {
+    $emptyStmt = $pdo->query("SELECT * FROM control_calidad LIMIT 0");
+    for ($i = 0; $i < $emptyStmt->columnCount(); $i++) {
+        $meta = $emptyStmt->getColumnMeta($i);
+        $columns[] = $meta['name'];
+    }
+}
+?>
+
+<h1>Sistema de Control de Calidad - Listado de Análisis</h1>
+
+<p>
+    <a href="formulario.html">Crear nuevo registro</a> | 
+    <a href="exportar_excel.php">Exportar a Excel</a>
+</p>
+
+<form method="get" action="index.php">
+    <label for="search">Buscar N° de análisis:</label>
+    <input type="text" id="search" name="search" value="<?= htmlspecialchars($search ?? '') ?>">
+    
+    <label for="limit">Mostrar:</label>
+    <select id="limit" name="limit">
+        <?php foreach ($validLimits as $option): ?>
+            <option value="<?= $option ?>" <?= ($limit === $option) ? 'selected' : '' ?>>
+                <?= $option ?>
+            </option>
+        <?php endforeach; ?>
+    </select>
+    
+    <button type="submit">Buscar</button>
+</form>
+
+<table border="1" cellspacing="0" cellpadding="5">
     <thead>
-      <tr>
-        <th>ID</th>
-        <th>Nº Análisis</th>
-        <th>Nº Orden</th>
-        <th>Producto</th>
-        <th>Lote</th>
-        <th>Formato</th>
-        <th>Control de balanza</th>
-        <th>Fecha</th>
-        <th>Controló</th>
-        <th>% Humedad (G. Humeda)</th>
-        <th>% Humedad (Estufa)</th>
-        <th>Humedad %</th>
-        <th>Grueso</th>
-        <th>Entrefino</th>
-        <th>Fino</th>
-        <th>Densidad Aparente</th>
-        <th>Densidad Compactada</th>
-        <th>Indice de Hausner</th>
-        <th>Indice de Carr</th>
-        <th>Peso</th>
-        <th>Dureza</th>
-        <th>Friabilidad</th>
-        <th>Disgregación</th>
-        <th>Altura</th>
-        <th>Humedad</th>
-        <th>Peso 1</th>
-        <th>Disgregación 1</th>
-        <th>Altura 1</th>
-        <th>A. Totales</th>
-        <th>Enterobact</th>
-        <th>E. Coli</th>
-        <th>S. Aureus</th>
-        <th>HyL</th>
-        <th>Grados Brix</th>
-        <th>Peso Promedio (10 caramelos)</th>
-        <th>Azúcar Libre (gr)</th>
-      </tr>
+        <tr>
+            <?php foreach ($columns as $colName): ?>
+                <th><?= htmlspecialchars($colName ?? '') ?></th>
+            <?php endforeach; ?>
+            <th>Acciones</th>
+        </tr>
     </thead>
     <tbody>
-      <?php foreach ($registros as $fila): ?>
-        <tr>
-          <td><?= htmlspecialchars($fila['id'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['n_análisis'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['n_orden'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['producto'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['lote'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['formato'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['control_de_balanza'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['fecha'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['controló'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['pct_humedad_g_humeda'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['pct_humedad_estufa'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['humedad_pct'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['grueso'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['entrefino'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['fino'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['densidad_aparente'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['densidad_compactada'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['indice_de_hausner'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['indice_de_carr'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['peso'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['dureza'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['friabilidad'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['disgregación'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['altura'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['humedad'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['peso1'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['disgregación1'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['altura1'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['a_totales'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['enterobact'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['e_coli'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['s_aureus'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['hyl'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['grados__brix'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['peso_promedio_10_caramelos'] ?? '') ?></td>
-          <td><?= htmlspecialchars($fila['azucar_libre'] ?? '') ?></td>
-        </tr>
-      <?php endforeach; ?>
+        <?php if (!empty($results)): ?>
+            <?php foreach ($results as $row): ?>
+            <tr>
+                <?php foreach ($columns as $colName): ?>
+                <td><?= htmlspecialchars($row[$colName] ?? '') ?></td>
+                <?php endforeach; ?>
+                <td><a href="editar.php?id=<?= urlencode($row['id'] ?? '') ?>">✏️ Editar</a> | <a href="eliminar.php?id=<?= urlencode($row['id'] ?? '') ?>" onclick="return confirm('¿Estás seguro de eliminar este registro?')">🗑️ Eliminar</a></td>
+            </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="<?= count($columns) + 1 ?>">No se encontraron resultados.</td>
+            </tr>
+        <?php endif; ?>
     </tbody>
-  </table>
+</table>
 
-<a href="formulario.html">➕ Nuevo Registro</a>
-<a href="exportar_excel.php" style="margin-left: 20px;">📥 Exportar a Excel</a>
+<?php if ($totalPages > 1): ?>
+<div>
+    <?php if ($page > 1): ?>
+        <a href="?page=<?= $page - 1 ?>&limit=<?= $limit ?>&search=<?= urlencode($search) ?>">&#171; Anterior</a>
+    <?php endif; ?>
+    <?php if ($page < $totalPages): ?>
+        <a href="?page=<?= $page + 1 ?>&limit=<?= $limit ?>&search=<?= urlencode($search) ?>">Siguiente &#187;</a>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
 
 </body>
 </html>
-	
