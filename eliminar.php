@@ -13,6 +13,9 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("ID inválido");
 }
 
+$limit = $_GET['limit'] ?? 10;
+$page = $_GET['page'] ?? 1;
+$search = $_GET['search'] ?? '';
 $id = (int) $_GET['id'];
 
 try {
@@ -24,7 +27,7 @@ try {
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     $stmt->execute();
 
-    header("Location: index.php");
+    header("Location: index.php?limit=$limit&page=$page&search=" . urlencode($search));
     exit;
 
 } catch (PDOException $e) {

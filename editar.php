@@ -14,7 +14,7 @@ try {
     $pdo = new PDO($dsn, $user, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    $id = $_POST['id'] ?? null;
+    $id = $_GET['id'] ?? null;
     if (!$id) {
         die("ID no proporcionado.");
     }

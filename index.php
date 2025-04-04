@@ -54,15 +54,20 @@ $stmt = $pdo->prepare($sql);
 if ($search !== '') {
     $stmt->bindValue(':search', "%$search%", PDO::PARAM_STR);
 }
+
+//Hago el select
 $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
 $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
+
 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $stmtCount = $pdo->prepare($sqlCount);
 if ($search !== '') {
     $stmtCount->bindValue(':search', "%$search%", PDO::PARAM_STR);
 }
+
+//Hago el count (para juntar sólo una cantidad de los datos)
 $stmtCount->execute();
 $totalRecords = $stmtCount->fetchColumn();
 $totalPages   = ceil($totalRecords / $limit);
@@ -77,14 +82,27 @@ if (!empty($results)) {
         $columns[] = $meta['name'];
     }
 }
+
 ?>
 
 <h1>Sistema de Control de Calidad - Listado de Análisis</h1>
 
 <p>
-    <a href="formulario.html">Crear nuevo registro</a> | 
+    <a href="formulario.php">Crear nuevo registro</a> | 
     <a href="exportar_excel.php">Exportar a Excel</a>
 </p>
+
+
+<?php if ($totalPages > 1): ?>
+<div>
+    <?php if ($page > 1): ?>
+        <a href="?page=<?= $page - 1 ?>&limit=<?= $limit ?>&search=<?= urlencode($search) ?>">&#171; Anterior</a>
+    <?php endif; ?>
+    <?php if ($page < $totalPages): ?>
+        <a href="?page=<?= $page + 1 ?>&limit=<?= $limit ?>&search=<?= urlencode($search) ?>">Siguiente &#187;</a>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
 
 <form method="get" action="index.php">
     <label for="search">Buscar N° de análisis:</label>
@@ -118,7 +136,10 @@ if (!empty($results)) {
                 <?php foreach ($columns as $colName): ?>
                 <td><?= htmlspecialchars($row[$colName] ?? '') ?></td>
                 <?php endforeach; ?>
-                <td><a href="editar.php?id=<?= urlencode($row['id'] ?? '') ?>">✏️ Editar</a> | <a href="eliminar.php?id=<?= urlencode($row['id'] ?? '') ?>" onclick="return confirm('¿Estás seguro de eliminar este registro?')">🗑️ Eliminar</a></td>
+                <td>
+                    <a href="formulario.php?id=<?= urlencode($row['id']) ?>&modo=editar">✏️ Editar</a> |
+                    <a href="eliminar.php?id=<?= urlencode($row['id'] ?? '') ?>&limit=<?= $limit ?>&page=<?= $page ?>&search=<?= urlencode($search) ?>" onclick="return confirm('¿Estás seguro de eliminar este registro?')">🗑️ Eliminar</a>
+                </td>
             </tr>
             <?php endforeach; ?>
         <?php else: ?>
@@ -139,6 +160,9 @@ if (!empty($results)) {
     <?php endif; ?>
 </div>
 <?php endif; ?>
-
+<p>
+    <a href="formulario.php">Crear nuevo registro</a> | 
+    <a href="exportar_excel.php">Exportar a Excel</a>
+</p>
 </body>
 </html>
