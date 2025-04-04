@@ -37,7 +37,7 @@ if ($search !== '') {
     $sqlCount .= ' WHERE "n_análisis" ILIKE :search';
 }
 
-$sql .= " ORDER BY id ASC LIMIT :limit OFFSET :offset";
+$sql .= " ORDER BY id DESC LIMIT :limit OFFSET :offset";
 
 $stmt = $pdo->prepare($sql);
 if ($search !== '') {
@@ -77,7 +77,6 @@ if (!empty($results)) {
 </head>
 <body class="container my-4">
 
-
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h2 class="mb-0"> Análisis de control de calidad </h2>
   <img src="mnt/data/Provefarma logo.png" alt="Logo Provefarma" style="height: 150px;">
@@ -104,17 +103,34 @@ if (!empty($results)) {
         <thead class="table-light">
             <tr>
                 <?php foreach ($columns as $col): ?>
-                    <th><?= htmlspecialchars((string) $col) ?></th>
+                    <th>
+                        <?php
+                            if (str_ends_with($col, '_array')) {
+                                echo htmlspecialchars(ucfirst(str_replace('_array', '', $col))) . " (valores tomados)";
+                            } else {
+                                echo htmlspecialchars((string) $col);
+                            }
+                        ?>
+                    </th>
                 <?php endforeach; ?>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
         <?php if (!empty($results)): ?>
-            <?php foreach ($results as $row): ?>
+            <?php foreach ($results as $index => $row): ?>
                 <tr>
                     <?php foreach ($columns as $col): ?>
-                        <td><?= htmlspecialchars((string) ($row[$col] ?? '')) ?></td>
+                        <td>
+                            <?php if (str_ends_with($col, '_array')): ?>
+                                <button class="btn btn-sm btn-link p-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?= $col . $index ?>">Ver valores</button>
+                                <div class="collapse mt-1" id="collapse<?= $col . $index ?>">
+                                    <pre class="small bg-light p-2 border rounded"><?= htmlspecialchars($row[$col] ?? '') ?></pre>
+                                </div>
+                            <?php else: ?>
+                                <?= htmlspecialchars((string) ($row[$col] ?? '')) ?>
+                            <?php endif; ?>
+                        </td>
                     <?php endforeach; ?>
                     <td>
                         <a href="formulario.php?id=<?= urlencode($row['id']) ?>&modo=editar" class="btn btn-sm btn-warning">Editar</a>
