@@ -77,7 +77,11 @@ if (!empty($results)) {
 </head>
 <body class="container my-4">
 
-<h1 class="mb-4">Sistema de Control de Calidad</h1>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"> Análisis de control de calidad </h2>
+  <img src="mnt/data/Provefarma logo.png" alt="Logo Provefarma" style="height: 150px;">
+</div>
 
 <div class="d-flex justify-content-between mb-3">
     <div>

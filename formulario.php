@@ -39,13 +39,17 @@ function generarInputsConValores($nombre, $registro) {
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title><?= $modo === 'editar' ? 'Editar Registro' : 'Nuevo Registro' ?></title>
+  <title><?= $modo === 'editar' ? 'Editar Registro de Análisis' : 'Nuevo Registro de Análisis' ?></title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body class="container my-3">
 
-<h2 class="mb-3"><?= $modo === 'editar' ? 'Editar Registro' : 'Nuevo Registro' ?></h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><?= $modo === 'editar' ? 'Editar Registro de Análisis' : 'Nuevo Registro de Análisis' ?></h2>
+  <img src="mnt/data/Provefarma logo.png" alt="Logo Provefarma" style="height: 150px;">
+</div>
+
 <a href="index.php" class="btn btn-secondary mb-3">Ver análisis</a>
 
 <form action="<?= $modo === 'editar' ? 'actualizar.php?id=' . $registro['id'] : 'insertar.php' ?>" method="POST">
